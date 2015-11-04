@@ -1,3 +1,7 @@
+# Ignore directories with data in them
+data/*
+models/*
+
 # OSX
 .DS_Store
 .Trashes
