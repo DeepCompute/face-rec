@@ -7,16 +7,8 @@ class HaarFeature:
         self.bottom_right_coord = (position[0] + height - 1, position[1] + width - 1)
         self.width = width
         self.height = height
-        self.threshold = 0
-        self.polarity = 0
     
-    def setThreshold(self, threshold):
-        self.threshold = threshold
-    
-    def setPolarity(self, polarity):
-        self.polarity = polarity
-    
-    def getRectangleSum(integral_image, top_left_coord, bottom_right_coord):
+    def getRectangleSum(self, integral_image, top_left_coord, bottom_right_coord):
         bottom_right_value = integral_image[bottom_right_coord[0]][bottom_right_coord[1]]
         bottom_left_value = integral_image[bottom_right_coord[0]][top_left_coord[1] - 1]
         
@@ -63,10 +55,10 @@ class HaarFeature:
         else:
             return self.getFeature2(integral_image)
         
-    def getClassification(self, integral_image):
+    def getClassification(self, integral_image, polarity, threshold):
         featureValue = self.getFeatureValue(integral_image);
         
-        if self.polarity * featureValue < self.polarity * self.threshold:
+        if polarity * featureValue < polarity * threshold:
             return 1 # positive example
         else:
             return 0 # negative example

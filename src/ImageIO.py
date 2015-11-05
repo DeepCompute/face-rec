@@ -5,7 +5,8 @@ Module with helper functions for loading images.
 
 '''
 
-import Image
+import cv2
+import os
 
 
 def loadFaceDetectionImages(directory):
@@ -17,7 +18,19 @@ def loadFaceDetectionImages(directory):
     Returns:
         list[Image], the loaded images.
     '''
-    pass
+    image_data = []
+    for file in os.listdir(directory):
+        if file.endswith('.pgm'):
+            image = cv2.imread(os.path.join(directory, file), cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            integral_image = cv2.integral(image)
+            
+            img_data_tuple = list()
+            img_data_tuple.append(integral_image) # integral image
+            img_data_tuple.append(1) # label
+            img_data_tuple.append(0.0) # weight
+            
+            image_data.append(img_data_tuple)
+    return image_data
 
 
 def loadFaceRecognitionImages(directory):
