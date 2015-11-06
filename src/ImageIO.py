@@ -9,12 +9,13 @@ import cv2
 import os
 
 
-def loadFaceDetectionImages(directory):
+def loadFaceDetectionImages(directory, label):
     '''
     Loads base face detection images from a given directory.
 
     Args:
         directory (str): The directory where face detection images are.
+        label (int): The label that should be assigned to each image.
     Returns:
         list[Image], the loaded images.
     '''
@@ -26,7 +27,7 @@ def loadFaceDetectionImages(directory):
             
             img_data_tuple = list()
             img_data_tuple.append(integral_image) # integral image
-            img_data_tuple.append(1) # label
+            img_data_tuple.append(label) # label
             img_data_tuple.append(0.0) # weight
             
             image_data.append(img_data_tuple)

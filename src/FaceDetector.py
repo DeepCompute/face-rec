@@ -9,7 +9,7 @@ class FaceDetector:
     def __init__(self, face_img_data, non_face_img_data):
         self.face_img_data = face_img_data
         self.non_face_img_data = non_face_img_data
-        self.model = FaceDetectionModel(10)
+        self.model = FaceDetectionModel(4, (19, 19))
     
     def fitModel(self):
         self.model.fitModel(self.face_img_data, self.non_face_img_data)
