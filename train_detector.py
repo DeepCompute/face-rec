@@ -12,8 +12,10 @@ if __name__ == '__main__':
     face_detector = FaceDetector(face_img_data, non_face_img_data)
     face_detector.fitModel()
     
-    test_directory = 'C:\\Users\\Sanghyun\\Downloads\\faces.tar\\faces\\test\\non-face'
+    # TODO: Move this to test_detector.py after object serialization
     
-    img_data = ImageIO.loadFaceDetectionImages(test_directory, 0)
+    test_directory = 'C:\\Users\\Sanghyun\\Downloads\\faces.tar\\faces\\test\\face'
+    
+    img_data = ImageIO.loadFaceDetectionImages(test_directory, 1)
     face_detector.classify(img_data)
     

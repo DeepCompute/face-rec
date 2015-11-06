@@ -15,7 +15,7 @@ class HaarFeature:
         top_right_value = integral_image[top_left_coord[0] - 1][bottom_right_coord[1]]
         top_left_value = integral_image[top_left_coord[0] - 1][top_left_coord[1] - 1]
         
-        return bottom_right_value - top_right_value + top_left_value - top_left_value;
+        return bottom_right_value - top_right_value + top_left_value - bottom_left_value;
     
     def getFeature1(self, integral_image):
         '''
@@ -25,7 +25,7 @@ class HaarFeature:
         white_top_left_coord = self.top_left_coord
         white_bottom_right_coord = (self.bottom_right_coord[0], self.top_left_coord[1] + (self.width / 2) - 1);
         
-        black_top_left_coord = (self.top_left_coord[1], self.top_left_coord[1] + (self.width / 2))
+        black_top_left_coord = (self.top_left_coord[0], self.top_left_coord[1] + (self.width / 2))
         black_bottom_right_coord = self.bottom_right_coord
         
         white_pixels_sum = self.getRectangleSum(integral_image, white_top_left_coord, white_bottom_right_coord)

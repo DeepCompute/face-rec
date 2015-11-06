@@ -43,7 +43,7 @@ class FaceDetectionModel:
                     for width in range(14, image_width - col, 2):
                         haar_features.append(HaarFeature(1, (row, col), width, height))
                         haar_features.append(HaarFeature(2, (row, col), width, height))
-                        #haar_features.append(HaarFeature(4, (row, col), width, height))
+                        haar_features.append(HaarFeature(4, (row, col), width, height))
                     #for width in range(9, image_width - col, 3):
                         #haar_features.append(HaarFeature(3, (row, col), width, height))
                     
