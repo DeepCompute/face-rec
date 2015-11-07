@@ -37,7 +37,7 @@ def loadFaceDetectionImages(directory, label):
     return image_data
 
 
-def loadFaceRecognitionImages(directory):
+def loadYalefacesImages(directory):
     '''
     Loads base face recognition images from a given directory (Yale face
     database).
@@ -73,7 +73,7 @@ def loadFaceRecognitionImages(directory):
 
             try:
                 img = scipy.ndimage.imread(filename)
-                images.append( (i-1, img.flatten()) )
+                images.append( (i-1, img.flatten(), mode) )
             except:
                 print 'Warning: [ImageIO] Unable to read {}'.format(filename)
 
@@ -87,6 +87,6 @@ if __name__ == '__main__':
 
     print 'Loading...'
     #loadFaceDetectionImages('data/?')
-    loadFaceRecognitionImages('data/yalefaces/')
+    loadYalefacesImages('data/yalefaces/')
     print 'Done'
 

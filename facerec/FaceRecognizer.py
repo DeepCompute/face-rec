@@ -52,7 +52,8 @@ class FaceRecognizer:
         # Add each class to the kNN classifier
 
         for instance in instances:
-            label, face = instance
+            label = instance[0]
+            face  = instance[1]
             t_face = self.face_recognition_model.transform(face)
             self.knn_classifier.add_sample(label, t_face)
 
