@@ -6,6 +6,8 @@ Tests the face recognition module with data from yalefaces.
 from facerec import ImageIO
 from facerec.FaceRecognizer import FaceRecognizer
 
+import time
+
 
 if __name__ == '__main__':
     '''
@@ -20,6 +22,11 @@ if __name__ == '__main__':
     for instance in instances:
         if instance[2] not in modes:
             modes.append(instance[2])
+
+    # Initialize tallies
+
+    avg_training_time = 0
+    avg_classification_time = 0
 
     # Number of correct classifications overall
     correct_count = 0
@@ -42,11 +49,15 @@ if __name__ == '__main__':
         label, features, mode = test_instance
 
         # Train with all other instances
+        runtime = time.time()
         face_recognizer = FaceRecognizer()
         face_recognizer.train(instances)
+        avg_training_time += (time.time()-runtime)/len(instances)
 
         # Make a prediction with removed instance
+        runtime = time.time()
         predicted_label = face_recognizer.classify(features)
+        avg_classification_time += (time.time()-runtime)/len(instances)
 
         # Increment tallies
         if predicted_label == label:
@@ -68,5 +79,8 @@ if __name__ == '__main__':
         print '\t{:>11} accuracy: {:.2f} ({:2d}/{:2d})'.format(
                 mode, correct_mode[mode]/total_mode[mode],
                 int(correct_mode[mode]), int(total_mode[mode]))
-
+    print '\nRuntimes:'
+    print '\tAverage training time:       {:.2f}'.format(avg_training_time)
+    print '\tAverage classification time: {:.2f}'.format(
+            avg_classification_time)
 

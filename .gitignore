@@ -2,6 +2,9 @@
 data/*
 models/*
 
+# Ignore directory with results entirely
+results/
+
 # OSX
 .DS_Store
 .Trashes
