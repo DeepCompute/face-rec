@@ -1,18 +1,19 @@
 '''
-FaceRecognitionModel.py
+PCAModel.py
 
-Class for computing and storing the learned face feature model.
+Class for computing and storing principal components for dimensionality
+reduction.
 
 '''
 
 import numpy as np
 
 
-class FaceRecognitionModel:
+class PCAModel:
 
     def __init__(self, k_rank=0):
         '''
-        Initializer for the face recognition model.
+        Constructor for PCAModel.
 
         Args (optional):
             k_rank (int): How many principal components to keep. A value of 0
@@ -24,7 +25,7 @@ class FaceRecognitionModel:
         self.trn_mean = 0
 
 
-    def normalize(self, faces):
+    def center(self, faces):
         '''
         Centers data to zero-mean.
 
@@ -42,19 +43,19 @@ class FaceRecognitionModel:
         return out, mean
 
 
-    def fit(self, faces):
+    def fit(self, data):
         '''
-        Fits a data matrix of faces to the model and learns features in the
-        optimal subspace.
+        Performs SVD to find the top-k eigenvectors and learn an optimal
+        subspace for the data.
 
         Args:
-            faces (numpy.ndarray): Data matrix of face vectors.
+            data (numpy.ndarray): Data matrix of feature vectors.
         '''
 
-        faces, self.trn_mean = self.normalize(faces)
+        data, self.trn_mean = self.center(data)
 
         # Perform SVD to get eigenvectors
-        U,S,V = np.linalg.svd(faces, full_matrices=False)
+        U,S,V = np.linalg.svd(data, full_matrices=False)
 
         # Store top-k eigenvectors as components
         if self.k_rank != 0:
@@ -65,26 +66,21 @@ class FaceRecognitionModel:
         self.is_fitted = True
 
 
-    def transform(self, face):
+    def transform(self, data):
         '''
-        Transforms a set of faces by projecting it into the optimal subspace
-        learned by PCA. Can be either a single face instance or multiple.
+        Transforms a feature vector by projecting it into the optimal subspace
+        learned by PCA. Can be either a single vector or multiple.
 
         Args:
-            face (numpy.ndarray): Data matrix of face vectors.
+            data (numpy.ndarray): Data matrix of feature vectors.
         Returns:
             numpy.ndarray, the transformed matrix if the model has been fitted.
                 None otherwise.
         '''
 
         if self.is_fitted:
-            return self.components.T.dot(face-self.trn_mean)
+            return self.components.T.dot(data-self.trn_mean)
         else:
             return None
 
-
-# Command-Line Invocation
-
-if __name__ == '__main__':
-    pass
 

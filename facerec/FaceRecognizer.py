@@ -7,7 +7,7 @@ Class for training face recognition models and performing classification.
 
 import numpy as np
 
-from FaceRecognitionModel import *
+from PCAModel import *
 from KNNClassifier import *
 
 
@@ -23,7 +23,7 @@ class FaceRecognizer:
                 kNN classifier.
         '''
 
-        self.face_recognition_model = FaceRecognitionModel(k_rank=0)
+        self.pca_model = PCAModel(k_rank=0)
         self.knn_classifier = KNNClassifier(k_neighbors=k_neighbors)
 
 
@@ -47,14 +47,14 @@ class FaceRecognizer:
                 faces = np.vstack((faces, instance[1]))
         faces = faces.T
 
-        self.face_recognition_model.fit(faces)
+        self.pca_model.fit(faces)
 
         # Add each class to the kNN classifier
 
         for instance in instances:
             label = instance[0]
             face  = instance[1]
-            t_face = self.face_recognition_model.transform(face)
+            t_face = self.pca_model.transform(face)
             self.knn_classifier.add_sample(label, t_face)
 
 
@@ -68,7 +68,7 @@ class FaceRecognizer:
             int, the class the face best belongs to.
         '''
 
-        t_face = self.face_recognition_model.transform(face)
+        t_face = self.pca_model.transform(face)
         return self.knn_classifier.classify(t_face)
 
 

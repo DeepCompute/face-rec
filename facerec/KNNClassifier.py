@@ -1,7 +1,7 @@
 '''
 KNNClassifier.py
 
-Class for performing k-nearest neighbor classification for face recognition.
+Class for performing k-nearest neighbor classification.
 
 '''
 
