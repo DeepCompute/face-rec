@@ -21,6 +21,25 @@ class FaceRecognitionModel:
 
         self.k_rank = k_rank
         self.is_fitted = False
+        self.trn_mean = 0
+
+
+    def normalize(self, faces):
+        '''
+        Centers data to zero-mean.
+
+        Args:
+            faces (numpy.ndarray): Data to center.
+        Returns:
+            numpy.ndarray, the normalized data.
+        '''
+
+        out = np.array(faces, copy=True, dtype='float')
+
+        mean = np.mean(out, axis=1)
+        for x in out.T:
+            x -= mean
+        return out, mean
 
 
     def fit(self, faces):
@@ -31,6 +50,8 @@ class FaceRecognitionModel:
         Args:
             faces (numpy.ndarray): Data matrix of face vectors.
         '''
+
+        faces, self.trn_mean = self.normalize(faces)
 
         # Perform SVD to get eigenvectors
         U,S,V = np.linalg.svd(faces, full_matrices=False)
@@ -57,7 +78,7 @@ class FaceRecognitionModel:
         '''
 
         if self.is_fitted:
-            return self.components.T.dot( face )
+            return self.components.T.dot(face-self.trn_mean)
         else:
             return None
 
