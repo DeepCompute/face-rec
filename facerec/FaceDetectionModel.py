@@ -7,12 +7,21 @@ from HaarFeature import HaarFeature
 class FaceDetectionModel: 
     
     def __init__(self, iterations, img_size):
+        '''
+        Constructor for FaceDetectionModel.
+
+        Args:
+            iterations (int): Number of AdaBoost iterations.
+            img_size (tuple<int, int>): Image dimension.
+        '''
+        
         self.features = None
         self.weights = None
+        self.threshold = 0
         self.iterations = iterations
         self.img_size = img_size
         
-    def fitModel(self, face_img_data, non_face_img_data):
+    def train(self, face_img_data, non_face_img_data):
         # Initialize weights
         
         num_of_face_images = len(face_img_data)
@@ -49,7 +58,7 @@ class FaceDetectionModel:
                     
         
         self.features = dict()
-        self.weights = []
+        img_weights = []
             
         for t in range(self.iterations):
             # Re-normalize weights
@@ -136,48 +145,42 @@ class FaceDetectionModel:
                 non_face_image[1] = predicted_label
             
             # Compute beta
-            self.weights.append(classification_error / (1.0 - classification_error))
+            img_weights.append(classification_error / (1.0 - classification_error))
             
             total_weight = 0.0
             
             # Update weights
             for face_image in face_img_data:
                 if face_image[1] == 1:
-                    face_image[2] = face_image[2] * self.weights[t]
+                    face_image[2] = face_image[2] * img_weights[t]
                 total_weight = total_weight + face_image[2]
         
             for non_face_image in non_face_img_data:
                 if non_face_image[1] == 0:
-                    non_face_image[2] = non_face_image[2] * self.weights[t]
+                    non_face_image[2] = non_face_image[2] * img_weights[t]
                 total_weight = total_weight + non_face_image[2]
-    
-    def classify(self, image_data):
-        alphas = []
+                
+        # Set final weights and threshold used for classification
+            
+        self.weights = []
         
         sum_of_alphas = 0.0
         
         for t in range(self.iterations):
-            alpha = np.log(1.0 / self.weights[t])
+            alpha = np.log(1.0 / img_weights[t])
             sum_of_alphas = sum_of_alphas + alpha
-            alphas.append(alpha)
+            self.weights.append(alpha)
             
-        threshold = 0.5 * sum_of_alphas
+        self.threshold = 0.5 * sum_of_alphas
+    
+    def classify(self, image):
+        value = 0.0
         
-        num_of_matches = 0.0
-        
-        for image in image_data:
-            label = 0
-            value = 0.0
-            for t in range(self.iterations):
-                best_feature = self.features[t]
-                value = value + (alphas[t] * best_feature[0].getClassification(image[0], best_feature[1], best_feature[2]))
+        for t in range(self.iterations):
+            best_feature = self.features[t]
+            value = value + (self.weights[t] * best_feature[0].getClassification(image[0], best_feature[1], best_feature[2]))
             
-            if value >= threshold:
-                label = 1
-            
-            if image[1] == label:
-                num_of_matches = num_of_matches + 1
-        
-        accuracy = num_of_matches / len(image_data)
-        
-        print 'Accuracy: ' + str(accuracy * 100)
+        if value >= self.threshold:
+            return 1 # positive (i.e. face)
+        else:
+            return 0
