@@ -18,8 +18,8 @@ if __name__ == '__main__':
     iterations = 7
     img_size = (19, 19)
     
-    face_detector = FaceDetector(face_img_data, non_face_img_data, iterations, img_size)
-    face_detector.train()
+    face_detector = FaceDetector(iterations, img_size)
+    face_detector.train(face_img_data, non_face_img_data)
     
     print 'Training time: {:.2f}'.format(time.time() - runtime)
     
