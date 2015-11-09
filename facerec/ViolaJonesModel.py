@@ -56,6 +56,7 @@ class ViolaJonesModel:
                     #for width in range(9, image_width - col, 3):
                         #haar_features.append(HaarFeature(3, (row, col), width, height))
                     
+        print 'Number of features: ' + str(len(haar_features))
         
         self.features = dict()
         img_weights = []
@@ -184,3 +185,9 @@ class ViolaJonesModel:
             return 1 # positive (i.e. face)
         else:
             return 0
+    
+    def getThreshold(self):
+        return self.threshold
+    
+    def setThreshold(self, threshold):
+        self.threshold = threshold

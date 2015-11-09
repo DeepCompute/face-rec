@@ -22,3 +22,6 @@ class FaceDetector:
     
     def classify(self, img_data):
         return self.model.classify(img_data)
+    
+    def getModel(self):
+        return self.model
