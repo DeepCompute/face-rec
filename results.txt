@@ -1,7 +1,0 @@
-| ---- ---- FaceRec ---- ----
-| Dataset        : Yalefaces B+
-| Train/Dev/Test : 70/10/20
-|
-| Total Samples  : 2414
-| Dimensions     : 32256
-|
