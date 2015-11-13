@@ -45,9 +45,12 @@ def loadYalefacesImages(directory):
     Args:
         directory (str): The directory where the face recognition images are.
     Returns:
-        list<tuple<int, numpy.ndarray>>, the loaded images as label/feature
-            tuples.
+        list<tuple<int, numpy.ndarray, str>>, the loaded images as
+            label/feature/mode tuples.
     '''
+
+    if not directory.endswith('/'):
+        directory = directory + '/'
 
     images = list()
 
@@ -80,13 +83,52 @@ def loadYalefacesImages(directory):
     return images
 
 
+def loadExtendedCroppedYalefaces(directory):
+    '''
+    Loads images from the cropped extended Yalefaces B+ dataset.
+
+    Args:
+        directory (str): The directory where the face recognition images are.
+    Returns:
+        list<tuple<int, numpy.ndarray>>, the loaded images as label/feature
+            tuples.
+    '''
+
+    if not directory.endswith('/'):
+        directory = directory + '/'
+
+    images = list()
+
+    label = 0
+
+    for folder in os.listdir(directory):
+
+        for filename in os.listdir(directory+folder):
+            # Check that it's an image and not the ambient image
+            if filename.endswith('.pgm') and 'Ambient' not in filename:
+
+                filepath = directory + folder + '/' + filename
+
+                try:
+                    img = scipy.ndimage.imread(filepath)
+                    images.append( (label, img.flatten(), filename[-12:-4]) )
+                except:
+                    print 'Warning: [ImageIO] Unable to read {}'.format(
+                        filepath)
+
+        label += 1
+
+    return images
+
+
 # Command-line Invocation
 
 if __name__ == '__main__':
     ''' Run IO functions. '''
 
-    print 'Loading...'
-    #loadFaceDetectionImages('data/?')
+    print 'Loading Yalefaces (A)'
     loadYalefacesImages('data/yalefaces/')
+    print 'Loading Yalefaces (Extended)'
+    loadExtendedCroppedYalefaces('data/yalefaces-ext/')
     print 'Done'
 
