@@ -37,7 +37,7 @@ def loadFaceDetectionImages(directory, label):
     return image_data
 
 
-def loadYalefacesImages(directory):
+def loadYalefacesImages(directory, loud=True):
     '''
     Loads base face recognition images from a given directory (Yale face
     database).
@@ -78,12 +78,14 @@ def loadYalefacesImages(directory):
                 img = scipy.ndimage.imread(filename)
                 images.append( (i-1, img.flatten(), mode) )
             except:
-                print 'Warning: [ImageIO] Unable to read {}'.format(filename)
+                if loud:
+                    print 'Warning: [ImageIO] Unable to read {}'.format(
+                        filename)
 
     return images
 
 
-def loadExtendedCroppedYalefaces(directory):
+def loadExtendedCroppedYalefaces(directory, loud=True):
     '''
     Loads images from the cropped extended Yalefaces B+ dataset.
 
@@ -113,8 +115,9 @@ def loadExtendedCroppedYalefaces(directory):
                     img = scipy.ndimage.imread(filepath)
                     images.append( (label, img.flatten(), filename[-12:-4]) )
                 except:
-                    print 'Warning: [ImageIO] Unable to read {}'.format(
-                        filepath)
+                    if loud:
+                        print 'Warning: [ImageIO] Unable to read {}'.format(
+                            filepath)
 
         label += 1
 

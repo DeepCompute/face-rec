@@ -10,20 +10,20 @@ import numpy as np
 
 class KNNClassifier:
 
-    def __init__(self, k_neighbors=5):
+    def __init__(self, neighbors=5):
         '''
         Constructor for KNNClassifier.
 
         Args (optional):
-            k_neighbors (int): The number of neighbors to compare against.
+            neighbors (int): The number of neighbors to compare against.
                 (Default 5, must be odd)
         '''
 
         # TODO: Make these sort of statements use conditional
-        if k_neighbors % 2 == 1:
-            self.k_neighbors = k_neighbors
+        if neighbors % 2 == 1:
+            self.neighbors = neighbors
         else:
-            self.k_neighbors = 5
+            raise RuntimeError('Number of neighbors should be odd.')
 
         self.reset()
 
@@ -75,31 +75,31 @@ class KNNClassifier:
 
         # Calculate distances and Find nearest neighbors
 
-        neighbors = list()
+        nearest = list()
 
         for instance in self.samples:
 
             distance = self.distance(instance[1], new_features)
 
-            if len(neighbors) < self.k_neighbors or distance < neighbors[-1][1]:
+            if len(nearest) < self.neighbors or distance < nearest[-1][1]:
                 # If a nearest neighbor, insertion sort into list of neighbors
 
                 idx = 0
-                for n in neighbors:
-                    if n[1] > distance:
+                for i, neighbor in enumerate(nearest):
+                    if neighbor[1] > distance:
+                        idx = i
                         break
-                    idx += 1
 
-                neighbors.insert( idx, (instance[0], distance))
+                nearest.insert( idx, (instance[0], distance))
 
-                if len(neighbors) > self.k_neighbors:
-                    neighbors.pop(-1)
+                if len(nearest) > self.neighbors:
+                    nearest.pop(-1)
 
         # Determine the majority class
 
         count = [0] * self.num_classes
 
-        for neighbor in neighbors:
+        for neighbor in nearest:
             count[ neighbor[0] ] += 1
 
         best_class = 0
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     # Train kNN classifier with toy data
 
-    classifier = KNNClassifier(k_neighbors=5)
+    classifier = KNNClassifier(neighbors=5)
 
     for i in range(0, 10):
         classifier.add_sample(0, gen_class0())

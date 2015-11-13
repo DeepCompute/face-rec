@@ -70,10 +70,11 @@ class FaceRecTest:
         # Load data
 
         if self.dataset == FaceRecData.Yalefaces_A:
-            self.instances = ImageIO.loadYalefacesImages(self.data_directory)
+            self.instances = ImageIO.loadYalefacesImages(
+                    self.data_directory, loud=False)
         elif self.dataset == FaceRecData.Yalefaces_B:
             self.instances = ImageIO.loadExtendedCroppedYalefaces(
-                    self.data_directory)
+                    self.data_directory, loud=False)
         else:
             raise RuntimeError('FaceRecTest not assigned a valid dataset')
 
@@ -231,9 +232,9 @@ class FaceRecTest:
 
         print '|'
         print '| PCA Dimensions : {}'.format(
-                self.face_recognizer.pca_model.k_rank)
+                self.face_recognizer.pca_model.dimensions)
         print '| k-Neighbors    : {}'.format(
-                self.face_recognizer.knn_classifier.k_neighbors)
+                self.face_recognizer.knn_classifier.neighbors)
         print ''
 
         test_results = self.test()

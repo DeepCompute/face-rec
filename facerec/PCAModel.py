@@ -11,16 +11,16 @@ import numpy as np
 
 class PCAModel:
 
-    def __init__(self, k_rank=5):
+    def __init__(self, dimensions=0):
         '''
         Constructor for PCAModel.
 
         Args (optional):
-            k_rank (int): How many principal components to keep. A value of 0
-                indicates that it should be full-rank. (Default 0)
+            dimensions (int): How many principal components to keep. A value
+            of 0 indicates that it should keep all components. (Default 0)
         '''
 
-        self.k_rank = k_rank
+        self.dimensions = dimensions
         self.is_fitted = False
         self.trn_mean = 0
 
@@ -76,8 +76,8 @@ class PCAModel:
         if self.components is None:
             raise RuntimeError('PCAModel has not been fitted yet!')
 
-        if self.k_rank != 0:
-            reduced_components = self.components[:,0:self.k_rank]
+        if self.dimensions != 0:
+            reduced_components = self.components[:,0:self.dimensions]
         else:
             reduced_components = self.components
 
