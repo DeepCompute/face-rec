@@ -67,8 +67,6 @@ class FaceRecognizer:
             int, the class the face best belongs to.
         '''
 
-        print 'Classifying'
-
         t_face = self.pca_model.transform(face)
         return self.knn_classifier.classify(t_face)
 

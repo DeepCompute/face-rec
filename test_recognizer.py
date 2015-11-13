@@ -6,7 +6,17 @@ Tests the face recognition module with data from yalefaces.
 from facerec import ImageIO
 from facerec.FaceRecognizer import FaceRecognizer
 
-import time
+import sys, time
+
+
+def test_loocv(instances):
+    '''
+    Tests the classifier with LOOCV.
+
+    Args:
+        instances (list<tuple>): List of label/data/mode tuples.
+    '''
+
 
 
 if __name__ == '__main__':
@@ -14,9 +24,21 @@ if __name__ == '__main__':
     Perform leave-one-out cross-validation on yalefaces dataset.
     '''
 
-    print 'Loading images from yalefaces...'
+    instances = None
 
-    instances = ImageIO.loadYalefacesImages('data/yalefaces/')
+    if len(sys.argv) > 1:
+        if sys.argv[1].lower() == 'a':
+            print 'Loading Yalefaces (A) dataset'
+            instances = ImageIO.loadYalefacesImages('data/yalefaces')
+        elif sys.argv[1].lower() == 'b':
+            print 'Loading extended Yalefaces (B) dataset'
+            instances = ImageIO.loadExtendedCroppedYalefaces(
+                    'data/yalefaces-ext')
+
+    if instances is None:
+        print 'Please specify which Yalefaces set to use (A or B)'
+        sys.exit(1)
+
 
     modes = list()
     for instance in instances:
