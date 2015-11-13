@@ -131,21 +131,32 @@ class FaceRecTest:
 
         results = list()
 
-        optimal_k = 3
+        optimal_d = 1
+        optimal_k = 1
+
         accuracy = 0
-        for k in range(1, 51, 2):
-            # TODO: Better accessor through FaceRecognizer to change this
-            # TODO: Put tuning on FaceRecognizer?
-            self.face_recognizer.knn_classifier.k_neighbors = k
-            test_results = self.test(use_dev=True)
 
-            results.append( (k, test_results['accuracy']))
+        # TODO: Put tuning on FaceRecognizer?
 
-            if test_results['accuracy'] > accuracy:
-                optimal_k = k
-                accuracy = test_results['accuracy']
+        for d in range(10, 100, 10):
 
-        self.face_recognizer.knn_classifier.k_neighbors = optimal_k
+            self.face_recognizer.set_dimensions(d)
+
+            for k in range(1, 21, 2):
+
+                self.face_recognizer.set_k_neighbors(k)
+
+                test_results = self.test(use_dev=True)
+
+                results.append( (d, k, test_results['accuracy']))
+
+                if test_results['accuracy'] > accuracy:
+                    optimal_d = d
+                    optimal_k = k
+                    accuracy = test_results['accuracy']
+
+        self.face_recognizer.set_dimensions(optimal_d)
+        self.face_recognizer.set_k_neighbors(optimal_k)
 
         return results
 
@@ -183,7 +194,7 @@ class FaceRecTest:
 
     def run(self):
         '''
-        Loads, trains, and tests the FaceRecognizer
+        Loads, trains, and tests the FaceRecognizer. Prints out a report.
         '''
 
         print '| ---- ---- FaceRec ---- ----'
@@ -201,6 +212,8 @@ class FaceRecTest:
         self.train()
         tune_results = self.tune()
 
+        print '| PCA Dimensions : {}'.format(
+                self.face_recognizer.pca_model.k_rank)
         print '| k-Neighbors    : {}'.format(
                 self.face_recognizer.knn_classifier.k_neighbors)
         print ''
@@ -213,8 +226,8 @@ class FaceRecTest:
         if self.loud:
             print '\nTuning results:'
             for entry in tune_results:
-                print '\tk = {:2d}, accuracy = {:.3f}'.format(
-                        entry[0], entry[1])
+                print '\td = {:2d}, k = {:2d}, accuracy = {:.3f}'.format(
+                        entry[0], entry[1], entry[2])
             print '\nPer-case results:'
             for idx, predicted_label in enumerate(test_results['predictions']):
                 print '\t[Case {:03d}] Predicted {:2d} as {:2d}'.format(

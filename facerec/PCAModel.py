@@ -11,7 +11,7 @@ import numpy as np
 
 class PCAModel:
 
-    def __init__(self, k_rank=0):
+    def __init__(self, k_rank=5):
         '''
         Constructor for PCAModel.
 
@@ -57,13 +57,8 @@ class PCAModel:
         # Perform SVD to get eigenvectors
         U,S,V = np.linalg.svd(data, full_matrices=False)
 
-        # Store top-k eigenvectors as components
-        if self.k_rank != 0:
-            self.components = U[0:self.k_rank]
-        else:
-            self.components = U
-
-        self.is_fitted = True
+        # Store eigenvectors as components
+        self.components = U
 
 
     def transform(self, data):
@@ -78,9 +73,14 @@ class PCAModel:
                 None otherwise.
         '''
 
-        if self.is_fitted:
-            return self.components.T.dot(data-self.trn_mean)
+        if self.components is None:
+            raise RuntimeError('PCAModel has not been fitted yet!')
+
+        if self.k_rank != 0:
+            reduced_components = self.components[:,0:self.k_rank]
         else:
-            return None
+            reduced_components = self.components
+
+        return reduced_components.T.dot(data-self.trn_mean)
 
 

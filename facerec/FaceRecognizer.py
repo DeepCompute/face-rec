@@ -23,8 +23,9 @@ class FaceRecognizer:
                 kNN classifier.
         '''
 
-        self.pca_model = PCAModel(k_rank=0)
+        self.pca_model = PCAModel(k_rank=k_rank)
         self.knn_classifier = KNNClassifier(k_neighbors=k_neighbors)
+        self.instances = None
 
 
     def train(self, instances):
@@ -35,6 +36,8 @@ class FaceRecognizer:
             instances (list<tuple<int, numpy.ndarray>>): List of label/face
                 data pairs.
         '''
+
+        self.instances = instances
 
         # Stack all of the faces together
 
@@ -56,6 +59,22 @@ class FaceRecognizer:
             t_face = self.pca_model.transform(face)
             self.knn_classifier.add_sample(label, t_face)
 
+    def fit_knn(self):
+        '''
+        Fits the kNN classifier with the current instances.
+        '''
+
+        if self.instances is None:
+            raise RuntimeError('FaceRecognizer has no instances')
+
+        self.knn_classifier.reset()
+
+        for instance in self.instances:
+            label = instance[0]
+            face  = instance[1]
+            t_face = self.pca_model.transform(face)
+            self.knn_classifier.add_sample(label, t_face)
+
 
     def classify(self, face):
         '''
@@ -69,6 +88,30 @@ class FaceRecognizer:
 
         t_face = self.pca_model.transform(face)
         return self.knn_classifier.classify(t_face)
+
+
+    def set_dimensions(self, k):
+        '''
+        Sets the number of dimensions to use from PCA.
+
+        Args:
+            k (int): The new number of dimensions.
+        '''
+
+        self.pca_model.k_rank = k
+        self.fit_knn()
+
+
+    def set_k_neighbors(self, k):
+        '''
+        Sets k for kNN classifier.
+
+        Args:
+            k (int): The new k for the classifier.
+        '''
+
+        self.knn_classifier.k_neighbors = k
+
 
 
 # Command-Line Invocation
