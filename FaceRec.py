@@ -18,28 +18,31 @@ class FaceRecData:
 class FaceRecTest:
 
     def __init__(self, dataset=FaceRecData.Yalefaces_A, data_directory='data',
-            trn_part=70, dev_part=10, tst_part=20, loud=False):
+            part=[70, 10, 20], loud=False, d_tuning=[25, 100, 25],
+            k_tuning=[1, 15]):
         '''
         Constructor for FaceRecTest.
 
         Args (optional):
-            dataset (FaceRecData.value): The dataset to use (default
-                FaceRecData.Yalefaces_A)
-            data_directory (str): The directory where the data lives (default
-                'data')
-            trn_part (int): What percentage of the data should be used for
-                training (default 70)
-            dev_part (int): "" for tuning (default 10)
-            tst_part (int): "" for testing (default 20)
-            loud (bool): Whether the classifier should print out fine details
+            dataset (FaceRecData.value): The dataset to use.
+            data_directory (str): The directory where the data lives.
+            part (int): What percentage of the data should be used for
+                training, dev, and test.
+            loud (bool): Whether the classifier should print out fine details.
+            d_tuning (tuple<int>): The range of PCA dimensions to observe
+                during tuning.
+            k_tuning (tuple<int>): The ranke of k for the kNN classifier to
+                observe during tuning.
         '''
 
         self.dataset         = dataset
         self.data_directory  = data_directory
-        self.trn_part        = trn_part
-        self.dev_part        = dev_part
-        self.tst_part        = tst_part
+        self.trn_part        = part[0]
+        self.dev_part        = part[1]
+        self.tst_part        = part[2]
         self.loud            = loud
+        self.d_tuning        = d_tuning
+        self.k_tuning        = k_tuning
 
         self.face_recognizer = FaceRecognizer()
 
@@ -48,9 +51,15 @@ class FaceRecTest:
         self.dev_data        = None
         self.tst_data        = None
 
-        if sum((trn_part, dev_part, tst_part)) != 100:
+        if sum(part) != 100:
             raise RuntimeError('Train/Dev/Test partitions don\'t add up '
                     'to 100%')
+        if len(d_tuning) != 3:
+            raise RuntimeError('3 parameters are required for tuning d '
+                    '({} found)'.format(len(d_tuning)))
+        if len(k_tuning) != 2:
+            raise RuntimeError('2 parameters are required for tuning k '
+                    '({} found)'.format(len(d_tuning)))
 
 
     def load_data(self):
@@ -136,13 +145,14 @@ class FaceRecTest:
 
         accuracy = 0
 
-        # TODO: Put tuning on FaceRecognizer?
+        d_start, d_end, d_step = self.d_tuning
+        k_start, k_end = self.k_tuning
 
-        for d in range(10, 100, 10):
+        for d in range(d_start, d_end+1, d_step):
 
             self.face_recognizer.set_dimensions(d)
 
-            for k in range(1, 21, 2):
+            for k in range(k_start, k_end+1, 2):
 
                 self.face_recognizer.set_k_neighbors(k)
 
@@ -186,9 +196,10 @@ class FaceRecTest:
                 correct_count += 1
             predicted_labels.append(predicted_label)
 
-        return { 'accuracy'    : correct_count/float(len(data)),
-                 'correct'     : correct_count,
-                 'predictions' : predicted_labels
+        return {
+            'accuracy'    : correct_count/float(len(data)),
+            'correct'     : correct_count,
+            'predictions' : predicted_labels
         }
 
 
@@ -207,11 +218,18 @@ class FaceRecTest:
         print '|'
         print '| Total Samples  : {}'.format(len(self.instances))
         print '| Dimensions     : {}'.format(len(self.instances[0][1]))
-        print '|'
 
         self.train()
+
+        print '|'
+        print '| Tuning d from {:3d} to {:3d} with step {}'.format(
+                self.d_tuning[0], self.d_tuning[1], self.d_tuning[2])
+        print '| Tuning k from {:3d} to {:3d} with step 2'.format(
+                self.k_tuning[0], self.k_tuning[1])
+
         tune_results = self.tune()
 
+        print '|'
         print '| PCA Dimensions : {}'.format(
                 self.face_recognizer.pca_model.k_rank)
         print '| k-Neighbors    : {}'.format(
@@ -243,7 +261,7 @@ if __name__ == '__main__':
         '-recdata',
         type=str,
         required=True,
-        help='Where the face recognition data is located.'
+        help='Where the face recognition data is located.',
     )
     parser.add_argument(
         '-extended',
@@ -254,7 +272,31 @@ if __name__ == '__main__':
     parser.add_argument(
         '-loud',
         action='store_true',
-        help='When enabled, additional information will be printed.'
+        help='When enabled, additional information will be printed.',
+    )
+    parser.add_argument(
+        '-tuning_partition', '-part',
+        nargs=3,
+        type=int,
+        default=[70, 10, 20],
+        help='How much the datset should be partitioned between training, '
+             'dev, and testing.',
+    )
+    parser.add_argument(
+        '-d_tuning',
+        nargs=3,
+        type=int,
+        default=[25, 100, 25],
+        help='The number of PCA dimensions to observe during tuning '
+             '(start/end/step).',
+    )
+    parser.add_argument(
+        '-k_tuning',
+        nargs=2,
+        type=int,
+        default=[1, 9],
+        help='The value of k for the kNN classifier to observe during '
+             'tuning (start/end)',
     )
 
     args = parser.parse_args()
@@ -265,7 +307,10 @@ if __name__ == '__main__':
     fr_test = FaceRecTest(
         dataset        = dataset,
         data_directory = args.recdata,
+        part           = args.tuning_partition,
         loud           = args.loud,
+        d_tuning       = args.d_tuning,
+        k_tuning       = args.k_tuning,
     )
     fr_test.run()
 
