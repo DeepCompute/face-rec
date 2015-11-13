@@ -36,16 +36,15 @@ class FaceRecognizer:
                 data pairs.
         '''
 
-        # Stack all of the faces together and learn principal components
+        # Stack all of the faces together
 
-        faces = None
-
+        faces_list = list()
         for instance in instances:
-            if faces is None: #TODO: Use proper way for this
-                faces = instance[1]
-            else:
-                faces = np.vstack((faces, instance[1]))
-        faces = faces.T
+            faces_list.append(instance[1])
+
+        faces = np.vstack(faces_list).T
+
+        # Learn principal components
 
         self.pca_model.fit(faces)
 
@@ -67,6 +66,8 @@ class FaceRecognizer:
         Returns:
             int, the class the face best belongs to.
         '''
+
+        print 'Classifying'
 
         t_face = self.pca_model.transform(face)
         return self.knn_classifier.classify(t_face)
