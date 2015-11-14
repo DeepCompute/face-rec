@@ -59,6 +59,7 @@ class FaceRecognizer:
             t_face = self.pca_model.transform(face)
             self.knn_classifier.add_sample(label, t_face)
 
+
     def fit_knn(self):
         '''
         Fits the kNN classifier with the current instances.
@@ -111,6 +112,20 @@ class FaceRecognizer:
         '''
 
         self.knn_classifier.neighbors = k
+
+
+    def set_kernel_variance(self, variance):
+        '''
+        Sets the variance for the RBF kernel and retrains.
+
+        Args:
+            variance (float): The new variance.
+        '''
+
+        self.pca_model.variance = variance
+
+        if self.instances is not None:
+            self.pca_model.fit(self.instances)
 
 
 
