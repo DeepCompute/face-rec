@@ -11,7 +11,7 @@ import numpy as np
 
 class PCAModel:
 
-    def __init__(self, dimensions=0, use_kernel=True, variance=100000):
+    def __init__(self, dimensions=0, use_kernel=True, variance=10000):
         '''
         Constructor for PCAModel.
 
@@ -80,31 +80,20 @@ class PCAModel:
             numpy.ndarray: The kernel matrix.
         '''
 
-        if len(data1.shape) == 2:
-            x, N1 = data1.shape
-        else:
-            N1 = 1
-
-        if len(data2.shape) == 2:
-            x, N2 = data2.shape
-        else:
-            N2 = 1
+        N1 = data1.shape[1] if len(data1.shape) == 2 else 1
+        N2 = data2.shape[1] if len(data2.shape) == 2 else 1
 
         gram = np.empty((N1, N2))
 
         for y in range(0, N2):
             for x in range(0, N1):
-                # TODO: Better way around this? 1xd numpy arrays don't have
-                # two dimensions, so data[:,x] throws exception
-                if N1 != 1 and N2 != 1:
-                    sum = np.sum((data1[:,x]-data2[:,y])**2)
-                elif N1 == 1 and N2 != 1:
-                    sum = np.sum((data1-data2[:,y])**2)
-                elif N1 != 1 and N2 == 1:
-                    sum = np.sum((data1[:,x]-data2)**2)
-                else:
-                    sum = np.sum((data1-data2)**2)
-                gram[x,y] = np.exp( -sum/(2*self.variance**2) )
+
+                d1 = data1[:,x] if N1 != 1 else data1
+                d2 = data2[:,y] if N2 != 1 else data2
+
+                top = np.linalg.norm(d1-d2) ** 2
+
+                gram[x,y] = np.exp( -top/(2*self.variance**2) )
 
         return gram
 
@@ -128,6 +117,7 @@ class PCAModel:
 
         # Perform SVD to get eigenvectors
         U,S,V = np.linalg.svd(data, full_matrices=False)
+
 
         # Store eigenvectors as components
         self.components = U
