@@ -100,7 +100,9 @@ class FaceRecognizer:
         '''
 
         self.pca_model.dimensions = dimensions
-        self.fit_knn()
+
+        if self.instances is not None:
+            self.fit_knn()
 
 
     def set_k_neighbors(self, k):

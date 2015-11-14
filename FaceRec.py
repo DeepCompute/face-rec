@@ -19,7 +19,7 @@ class FaceRecTest:
 
     def __init__(self, dataset=FaceRecData.Yalefaces_A, data_directory='data',
             part=[70, 10, 20], loud=False, d_tuning=[25, 100, 25],
-            k_tuning=[1, 15]):
+            k_tuning=[1, 15], skip_tuning=False, d_value=0, k_value=3):
         '''
         Constructor for FaceRecTest.
 
@@ -43,6 +43,9 @@ class FaceRecTest:
         self.loud            = loud
         self.d_tuning        = d_tuning
         self.k_tuning        = k_tuning
+        self.skip_tuning     = skip_tuning
+        self.d_value         = d_value
+        self.k_value         = k_value
 
         self.face_recognizer = FaceRecognizer()
 
@@ -130,6 +133,9 @@ class FaceRecTest:
 
         if self.trn_data is None:
             raise RuntimeError('Data has not been loaded yet!')
+
+        self.face_recognizer.set_dimensions(self.d_value)
+        self.face_recognizer.set_k_neighbors(self.k_value)
 
         self.face_recognizer.train(self.trn_data)
 
@@ -222,13 +228,14 @@ class FaceRecTest:
 
         self.train()
 
-        print '|'
-        print '| Tuning d from {:3d} to {:3d} with step {}'.format(
-                self.d_tuning[0], self.d_tuning[1], self.d_tuning[2])
-        print '| Tuning k from {:3d} to {:3d} with step 2'.format(
-                self.k_tuning[0], self.k_tuning[1])
+        if not self.skip_tuning:
+            print '|'
+            print '| Tuning d from {:3d} to {:3d} with step {}'.format(
+                    self.d_tuning[0], self.d_tuning[1], self.d_tuning[2])
+            print '| Tuning k from {:3d} to {:3d} with step 2'.format(
+                    self.k_tuning[0], self.k_tuning[1])
 
-        tune_results = self.tune()
+            tune_results = self.tune()
 
         print '|'
         print '| PCA Dimensions : {}'.format(
@@ -299,6 +306,23 @@ if __name__ == '__main__':
         help='The value of k for the kNN classifier to observe during '
              'tuning (start/end)',
     )
+    parser.add_argument(
+        '-skip_tuning',
+        action='store_true',
+        help='When enabled, tuning parameters will be skipped.',
+    )
+    parser.add_argument(
+        '-k_value',
+        type=int,
+        default=3,
+        help='Use this value for k when skipping tuning.',
+    )
+    parser.add_argument(
+        '-d_value',
+        type=int,
+        default=0,
+        help='Use this value for d when skipping tuning.',
+    )
 
     args = parser.parse_args()
 
@@ -312,6 +336,9 @@ if __name__ == '__main__':
         loud           = args.loud,
         d_tuning       = args.d_tuning,
         k_tuning       = args.k_tuning,
+        skip_tuning    = args.skip_tuning,
+        d_value        = args.d_value,
+        k_value        = args.k_value,
     )
     fr_test.run()
 
