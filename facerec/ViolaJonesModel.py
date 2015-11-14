@@ -56,8 +56,6 @@ class ViolaJonesModel:
                     #for width in range(9, image_width - col, 3):
                         #haar_features.append(HaarFeature(3, (row, col), width, height))
                     
-        print 'Number of features: ' + str(len(haar_features))
-        
         self.features = dict()
         img_weights = []
             
