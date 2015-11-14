@@ -325,7 +325,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-var_tuning',
         nargs=3,
-        type=float,
+        type=int,
         default=[2500, 10000, 2500],
         help='The values for the RBF variance to observe during tuning '
              '(start/end/step)'
