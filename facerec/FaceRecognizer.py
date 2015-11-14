@@ -127,7 +127,7 @@ class FaceRecognizer:
         self.pca_model.variance = variance
 
         if self.instances is not None:
-            self.pca_model.fit(self.instances)
+            self.train(self.instances)
 
 
 

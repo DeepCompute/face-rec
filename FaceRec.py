@@ -19,7 +19,8 @@ class FaceRecTest:
 
     def __init__(self, dataset=FaceRecData.Yalefaces_A, data_directory='data',
             part=[70, 10, 20], loud=False, d_tuning=[25, 100, 25],
-            k_tuning=[1, 15], skip_tuning=False, d_value=0, k_value=3):
+            k_tuning=[1, 15], var_tuning=[1000, 10000, 1000],
+            skip_tuning=False, d_value=0, k_value=3, var_value=10000):
         '''
         Constructor for FaceRecTest.
 
@@ -43,9 +44,11 @@ class FaceRecTest:
         self.loud            = loud
         self.d_tuning        = d_tuning
         self.k_tuning        = k_tuning
+        self.var_tuning      = var_tuning
         self.skip_tuning     = skip_tuning
         self.d_value         = d_value
         self.k_value         = k_value
+        self.var_value       = var_value
 
         self.face_recognizer = FaceRecognizer()
 
@@ -136,6 +139,7 @@ class FaceRecTest:
 
         self.face_recognizer.set_dimensions(self.d_value)
         self.face_recognizer.set_k_neighbors(self.k_value)
+        self.face_recognizer.set_kernel_variance(self.var_value)
 
         self.face_recognizer.train(self.trn_data)
 
@@ -149,31 +153,39 @@ class FaceRecTest:
 
         optimal_d = 1
         optimal_k = 1
+        optimal_v = 1
 
         accuracy = 0
 
         d_start, d_end, d_step = self.d_tuning
         k_start, k_end = self.k_tuning
+        v_start, v_end, v_step = self.var_tuning
 
-        for d in range(d_start, d_end+1, d_step):
+        for v in range(v_start, v_end+1, v_step):
 
-            self.face_recognizer.set_dimensions(d)
+            self.face_recognizer.set_kernel_variance(v)
 
-            for k in range(k_start, k_end+1, 2):
+            for d in range(d_start, d_end+1, d_step):
 
-                self.face_recognizer.set_k_neighbors(k)
+                self.face_recognizer.set_dimensions(d)
 
-                test_results = self.test(use_dev=True)
+                for k in range(k_start, k_end+1, 2):
 
-                results.append( (d, k, test_results['accuracy']))
+                    self.face_recognizer.set_k_neighbors(k)
 
-                if test_results['accuracy'] > accuracy:
-                    optimal_d = d
-                    optimal_k = k
-                    accuracy = test_results['accuracy']
+                    test_results = self.test(use_dev=True)
+
+                    results.append( (d, k, test_results['accuracy']))
+
+                    if test_results['accuracy'] > accuracy:
+                        optimal_d = d
+                        optimal_k = k
+                        optimal_v = v
+                        accuracy = test_results['accuracy']
 
         self.face_recognizer.set_dimensions(optimal_d)
         self.face_recognizer.set_k_neighbors(optimal_k)
+        self.face_recognizer.set_kernel_variance(optimal_v)
 
         return results
 
@@ -234,6 +246,8 @@ class FaceRecTest:
                     self.d_tuning[0], self.d_tuning[1], self.d_tuning[2])
             print '| Tuning k from {:3d} to {:3d} with step 2'.format(
                     self.k_tuning[0], self.k_tuning[1])
+            print '| Tuning RBF variance from {} to {} with step {}'.format(
+                    self.var_tuning[0], self.var_tuning[1], self.var_tuning[2])
 
             tune_results = self.tune()
 
@@ -242,6 +256,8 @@ class FaceRecTest:
                 self.face_recognizer.pca_model.dimensions)
         print '| k-Neighbors    : {}'.format(
                 self.face_recognizer.knn_classifier.neighbors)
+        print '| RBF Variance   : {}'.format(
+                self.face_recognizer.pca_model.variance)
         print ''
 
         test_results = self.test()
@@ -294,7 +310,7 @@ if __name__ == '__main__':
         '-d_tuning',
         nargs=3,
         type=int,
-        default=[25, 100, 25],
+        default=[0, 0, 1],
         help='The number of PCA dimensions to observe during tuning '
              '(start/end/step).',
     )
@@ -302,9 +318,17 @@ if __name__ == '__main__':
         '-k_tuning',
         nargs=2,
         type=int,
-        default=[1, 9],
+        default=[1, 5],
         help='The value of k for the kNN classifier to observe during '
              'tuning (start/end)',
+    )
+    parser.add_argument(
+        '-var_tuning',
+        nargs=3,
+        type=float,
+        default=[2500, 10000, 2500],
+        help='The values for the RBF variance to observe during tuning '
+             '(start/end/step)'
     )
     parser.add_argument(
         '-skip_tuning',
@@ -323,6 +347,12 @@ if __name__ == '__main__':
         default=0,
         help='Use this value for d when skipping tuning.',
     )
+    parser.add_argument(
+        '-var_value',
+        type=float,
+        default=10000,
+        help='Use this value for the RBF variance when skipping tuning.',
+    )
 
     args = parser.parse_args()
 
@@ -336,9 +366,11 @@ if __name__ == '__main__':
         loud           = args.loud,
         d_tuning       = args.d_tuning,
         k_tuning       = args.k_tuning,
+        var_tuning     = args.var_tuning,
         skip_tuning    = args.skip_tuning,
         d_value        = args.d_value,
         k_value        = args.k_value,
+        var_value      = args.var_value,
     )
     fr_test.run()
 
