@@ -13,7 +13,7 @@ from KNNClassifier import *
 
 class FaceRecognizer:
 
-    def __init__(self, dimensions=0, k_neighbors=5):
+    def __init__(self, dimensions=0, k_neighbors=5, use_kernel=False):
         '''
         Constructor for FaceRecognizer.
 
@@ -23,7 +23,7 @@ class FaceRecognizer:
                 kNN classifier.
         '''
 
-        self.pca_model = PCAModel(dimensions=dimensions)
+        self.pca_model = PCAModel(dimensions=dimensions, use_kernel=use_kernel)
         self.knn_classifier = KNNClassifier(neighbors=k_neighbors)
         self.instances = None
 
@@ -126,7 +126,7 @@ class FaceRecognizer:
 
         self.pca_model.variance = variance
 
-        if self.instances is not None:
+        if self.instances is not None and self.pca_model.use_kernel:
             self.train(self.instances)
 
 

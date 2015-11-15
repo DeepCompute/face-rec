@@ -20,7 +20,8 @@ class FaceRecTest:
     def __init__(self, dataset=FaceRecData.Yalefaces_A, data_directory='data',
             part=[70, 10, 20], loud=False, d_tuning=[25, 100, 25],
             k_tuning=[1, 15], var_tuning=[1000, 10000, 1000],
-            skip_tuning=False, d_value=0, k_value=3, var_value=10000):
+            skip_tuning=False, d_value=0, k_value=3, var_value=10000,
+            use_kernel=False): # TODO: Better way to init this?
         '''
         Constructor for FaceRecTest.
 
@@ -49,8 +50,9 @@ class FaceRecTest:
         self.d_value         = d_value
         self.k_value         = k_value
         self.var_value       = var_value
+        self.use_kernel      = use_kernel
 
-        self.face_recognizer = FaceRecognizer()
+        self.face_recognizer = FaceRecognizer(use_kernel=use_kernel)
 
         self.instances       = None
         self.trn_data        = None
@@ -160,6 +162,8 @@ class FaceRecTest:
         d_start, d_end, d_step = self.d_tuning
         k_start, k_end = self.k_tuning
         v_start, v_end, v_step = self.var_tuning
+        if not self.use_kernel:
+            v_start, v_end, v_step = 0, 0, 1
 
         for v in range(v_start, v_end+1, v_step):
 
@@ -246,8 +250,10 @@ class FaceRecTest:
                     self.d_tuning[0], self.d_tuning[1], self.d_tuning[2])
             print '| Tuning k from {:3d} to {:3d} with step 2'.format(
                     self.k_tuning[0], self.k_tuning[1])
-            print '| Tuning RBF variance from {} to {} with step {}'.format(
-                    self.var_tuning[0], self.var_tuning[1], self.var_tuning[2])
+            if self.use_kernel:
+                print '| Tuning RBF variance from {} to {} with step {}' \
+                        .format(self.var_tuning[0], self.var_tuning[1],
+                        self.var_tuning[2])
 
             tune_results = self.tune()
 
@@ -256,8 +262,9 @@ class FaceRecTest:
                 self.face_recognizer.pca_model.dimensions)
         print '| k-Neighbors    : {}'.format(
                 self.face_recognizer.knn_classifier.neighbors)
-        print '| RBF Variance   : {}'.format(
-                self.face_recognizer.pca_model.variance)
+        if self.use_kernel:
+            print '| RBF Variance   : {}'.format(
+                    self.face_recognizer.pca_model.variance)
         print ''
 
         test_results = self.test()
@@ -353,6 +360,11 @@ if __name__ == '__main__':
         default=10000,
         help='Use this value for the RBF variance when skipping tuning.',
     )
+    parser.add_argument(
+        '-use_kernel',
+        action='store_true',
+        help='Use kernel PCA instead of linear PCA.',
+    )
 
     args = parser.parse_args()
 
@@ -371,6 +383,7 @@ if __name__ == '__main__':
         d_value        = args.d_value,
         k_value        = args.k_value,
         var_value      = args.var_value,
+        use_kernel     = args.use_kernel,
     )
     fr_test.run()
 

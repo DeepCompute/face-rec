@@ -11,7 +11,7 @@ import numpy as np
 
 class PCAModel:
 
-    def __init__(self, dimensions=0, use_kernel=True, variance=10000):
+    def __init__(self, dimensions=0, use_kernel=False, variance=10000):
         '''
         Constructor for PCAModel.
 
