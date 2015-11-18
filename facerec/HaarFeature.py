@@ -110,3 +110,7 @@ class HaarFeature:
             return 1 # positive example
         else:
             return 0 # negative example
+    
+    def getDetail(self):
+        return 'Feature Type: {}, Position: ({}, {}), Height: {}, Width: {}'.format(self.type, 
+                self.top_left_coord[0], self.top_left_coord[1], self.height, self.width)

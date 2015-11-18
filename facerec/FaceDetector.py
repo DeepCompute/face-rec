@@ -25,3 +25,6 @@ class FaceDetector:
     
     def getModel(self):
         return self.model
+    
+    def getModelDetails(self):
+        return self.model.getDetails()

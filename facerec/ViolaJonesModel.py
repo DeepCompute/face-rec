@@ -189,3 +189,21 @@ class ViolaJonesModel:
     
     def setThreshold(self, threshold):
         self.threshold = threshold
+    
+    # This should be defined as abstract method in the future...
+    def getDetails(self):
+        weights_dict = dict()
+        
+        for i in range(len(self.weights)):
+            weights_dict[i] = self.weights[i]
+                
+        sorted_indices = sorted(weights_dict, key=weights_dict.get, reverse=True)
+        
+        details = list()
+        details.append('List of learned Haar features (ordered by their weights)...')
+        
+        for index in sorted_indices:
+            feature = self.features[index]
+            details.append(feature[0].getDetail())
+        
+        return details

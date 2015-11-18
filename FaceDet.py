@@ -223,6 +223,12 @@ class FaceDetTest:
                 test_results['faces'][1], len(self.face_tst_data))
         print '| Accuracy (non-faces)      : {:.3f} ({}/{})'.format(test_results['non-faces'][0],
                 test_results['non-faces'][1], len(self.non_face_tst_data))
+        print '|'
+        
+        model_details = self.face_detector.getModelDetails()
+        
+        for model_detail in model_details:
+            print '| ' + model_detail
 
 if __name__ == '__main__':
 
