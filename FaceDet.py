@@ -5,7 +5,7 @@ CLI for testing the face detector
 from facerec import ImageIO
 from facerec.FaceDetector import FaceDetector
 
-import argparse, os, random, sys, time
+import argparse, os, random, sys, time, numpy
 
 # "Enum" to specify different face detection data sets
 class FaceDetData:
@@ -36,8 +36,6 @@ class FaceDetTest:
         self.iterations         = iterations
         self.desired_accuracy   = desired_accuracy
         
-        self.face_detector = FaceDetector(iterations, (19, 19))
-
         self.face_instances     = None
         self.non_face_instances = None
         self.face_trn_data      = None
@@ -88,6 +86,10 @@ class FaceDetTest:
             self.non_face_instances.extend(ImageIO.loadFaceDetectionImages(self.data_directory + '/test/non-face', 0))
         else:
             raise RuntimeError('FaceDetTest not assigned a valid dataset')
+        
+        img_size = numpy.shape(self.face_instances[0][0])
+        
+        self.face_detector = FaceDetector(self.iterations, img_size)
         
         self.total_face_instances = len(self.face_instances)
         self.total_non_face_instances = len(self.non_face_instances)

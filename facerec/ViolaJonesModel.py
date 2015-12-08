@@ -43,17 +43,31 @@ class ViolaJonesModel:
         image_height = self.img_size[0]
         image_width = self.img_size[1]
         
+        # Ideally these values should be 0 but they dramatically increase training time
+        min_height = int(float(image_height) * 0.7)
+        min_width_1 = int(float(image_height) * 0.7)
+        min_width_2 = int(float(image_height) * 0.4)
+        
+        if min_height % 2 == 1:
+            min_height = min_height + 1
+        
+        if min_width_1 % 2 == 1:
+            min_width_1 = min_width_1 + 1
+        
+        if min_width_2 % 2 == 0:
+            min_width_2 = min_width_2 + 1   
+        
         haar_features = [];
         
         # Create features
         for row in range(1, image_height, 1):
             for col in range(1, image_width, 1):
-                for height in range(14, image_height - row, 2):
-                    for width in range(14, image_width - col, 2):
+                for height in range(min_height, image_height - row, 2):
+                    for width in range(min_width_1, image_width - col, 2):
                         haar_features.append(HaarFeature(1, (row, col), width, height))
                         haar_features.append(HaarFeature(2, (row, col), width, height))
                         haar_features.append(HaarFeature(4, (row, col), width, height))
-                    for width in range(9, image_width - col, 3):
+                    for width in range(min_width_2, image_width - col, 3):
                         haar_features.append(HaarFeature(3, (row, col), width, height))
                     
         self.features = dict()
