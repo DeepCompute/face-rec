@@ -5,7 +5,7 @@ CLI for testing the face detector
 from facerec import ImageIO
 from facerec.FaceDetector import FaceDetector
 
-import argparse, os, random, sys, time, numpy
+import argparse, os, random, sys, time, numpy, cv2
 
 # "Enum" to specify different face detection data sets
 class FaceDetData:
@@ -265,17 +265,41 @@ if __name__ == '__main__':
         default=85,
         help='The desired accuracy for detecting faces in face images.',
     )
+    parser.add_argument(
+        '-det_faces_in_img',
+        nargs=1,
+        type=bool,
+        default=False,
+        help='Set to "True" if detecting faces with openCV for a given image',
+    )
 
     args = parser.parse_args()
+    
+    use_open_cv = args.det_faces_in_img
 
-    dataset = FaceDetData.MIT_Face_Data
+    if use_open_cv:
+        face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt_tree.xml')
+    
+        image = cv2.imread(args.detdata, cv2.CV_LOAD_IMAGE_GRAYSCALE)
+            
+        faces = face_cascade.detectMultiScale(image, 1.05, 3, cv2.cv.CV_HAAR_SCALE_IMAGE)
+            
+        for (x,y,w,h) in faces:
+            cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+            
+        cv2.imshow('img',image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        dataset = FaceDetData.MIT_Face_Data
 
-    fd_test = FaceDetTest(
-        dataset             = dataset,
-        data_directory      = args.detdata,
-        part                = args.tuning_partition,
-        iterations          = args.iterations,
-        desired_accuracy    = args.desired_accuracy,
-    )
-    fd_test.run()
+        fd_test = FaceDetTest(
+            dataset             = dataset,
+            data_directory      = args.detdata,
+            part                = args.tuning_partition,
+            iterations          = args.iterations,
+            desired_accuracy    = args.desired_accuracy,
+        )
+        fd_test.run()
+    
     
